@@ -16,6 +16,7 @@ dotenv.load_dotenv()
 stop = Event()
 in_device = None
 
+DEBUG = False
 p = pyaudio.PyAudio()
 info = p.get_host_api_info_by_index(0)
 numdevices = info.get('deviceCount')
@@ -76,7 +77,8 @@ def _start_audio_module():
         # apply the curve
         return (audio * fade_curve * 32768.0).astype(np.int16).tobytes()
 
-    print("starting ...")
+    if DEBUG:
+        print("starting ...")
     stream = p.open(format=FORMAT, channels=CHANNELS,
                     rate=SAMPLE_RATE, input=True, input_device_index=in_device,
                     frames_per_buffer=CHUNK, stream_callback=callback)
@@ -85,7 +87,6 @@ def _start_audio_module():
                     rate=SAMPLE_RATE, output=True, output_device_index=out_device,
                     frames_per_buffer=CHUNK)
 
-    time.sleep(5)
     import string
     letters = set(string.ascii_letters)
 
@@ -94,7 +95,8 @@ def _start_audio_module():
         if stop.is_set(): break
         times = json.loads(s.recv_data()[1])
         
-        print(times["transcript"]["text"], times["times"])
+        if DEBUG:
+            print(times["transcript"]["text"], times["times"])
         # text_string.set(times["transcript"]["text"].strip())
 
         if len(data) >= since_last:
@@ -102,7 +104,8 @@ def _start_audio_module():
             ignore_times = []
             indexes = []
             idx = 0
-            print(times["transcript"])
+            if DEBUG:
+                print(times["transcript"])
             for line in times["transcript"]["segments"]:
                 for word in line["words"]:
                     idx += 1  # space
@@ -128,32 +131,30 @@ def _start_audio_module():
             text_widget.configure(state="normal")
             text_widget.delete('1.0', tk.END)
             text_widget.insert(tk.END, times["transcript"]["text"])
+
+            text_widget.tag_configure("center", justify='center')
+            text_widget.insert("1.0", "text")
+            text_widget.tag_add("center", "1.0", "end")
+
             for start, end in indexes:
                 text_widget.tag_add("highlight", f"1.{start}", f"1.{end}")
             text_widget.tag_config("highlight", foreground="red")
             text_widget.configure(state="disabled")
 
             back_index = times["back_index"]
-            print(back_index)
+            if DEBUG:
+                print(back_index)
             together = b"".join(data[back_index-since_last+1:back_index+1])
             start = 0
             new_bytes = []
             for i, time_to_ignore in enumerate(ignore_times):
                 start_of_remove, end_of_remove = [t*SAMPLE_RATE for t in time_to_ignore]
-                fade_duration = int(0.05*SAMPLE_RATE)
 
                 value = int(start_of_remove*2)
-                # cutoff = value
-                    # cutoff -= int(fade_duration)
                 if start != 0:
                     new_bytes.append(together[start:value])
                 else:
                     new_bytes.append(together[start:value])
-
-                # if len(ignore_times) > i+1 and ignore_times[i+1]:
-                #     offset = int(fade_duration)
-                #     new_bytes.append(fade(together[value:value+offset]))
-                #     new_bytes.append(fade(together[int(end_of_remove)*2-offset:int(end_of_remove)*2], out=False))
 
                 start = int(end_of_remove*2)
             
@@ -201,7 +202,7 @@ button_var = tk.StringVar()
 button_var.set("Start")
 
 # Create a text label with text_string
-text_widget = tk.Text(root, height=3, width=300, font=(None, 24))
+text_widget = tk.Text(root, height=3, width=250, font=(None, 24), wrap=tk.WORD)
 text_widget.pack(pady=10)
 
 # Create a button that toggles on and off
