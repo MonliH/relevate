@@ -133,7 +133,6 @@ def _start_audio_module():
             text_widget.insert(tk.END, times["transcript"]["text"])
 
             text_widget.tag_configure("center", justify='center')
-            text_widget.insert("1.0", "text")
             text_widget.tag_add("center", "1.0", "end")
 
             for start, end in indexes:
