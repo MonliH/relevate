@@ -4,7 +4,7 @@ HTN 2023 Project.
 
 ## usage
 
-Install [BlackHole]().
+Install [BlackHole](https://github.com/ExistentialAudio/BlackHole).
 
 ### Server
 
