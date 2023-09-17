@@ -21,7 +21,6 @@ info = p.get_host_api_info_by_index(0)
 numdevices = info.get('deviceCount')
 
 HOST = os.environ["HOST"]
-print(HOST)
 
 devices = {}
 for i in range(0, numdevices):
@@ -188,7 +187,7 @@ def dropdown_selected(event):
 root = tk.Tk()
 root.geometry("400x300")
 # do not allow window resizing
-root.title("Speech")
+root.title("Relevate")
 root.tk.call('source', 'forest-light.tcl')
 ttk.Style().theme_use('forest-light')
 root.resizable(False, False)
