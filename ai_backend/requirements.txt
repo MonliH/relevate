@@ -1,3 +1,6 @@
 git+https://github.com/linto-ai/whisper-timestamped
 matplotlib
 openai-whisper
+fastapi
+transformers
+datasets
